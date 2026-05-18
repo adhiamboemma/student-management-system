@@ -73,6 +73,24 @@ void addStudent(Student students[], int *count) {
 
     printf("Student added successfully!\n");
 }
+ 
+void displayStudents(Student students[], int count) {
+    if (count == 0) {
+        printf("\nNo student records found.\n");
+        return;
+    }
+
+    printf("\n===== ALL STUDENT RECORDS =====\n");
+    for (int i = 0; i < count; i++) {
+        printf("Name: %s\n", students[i].name);
+        printf("Admission Number: %d\n", students[i].admissionNo);
+        printf("Age: %d\n", students[i].age);
+        printf("Average: %.2f\n", students[i].average);
+        printf("Grade: %c\n", students[i].grade);
+        printf("---------------------------\n");
+    }
+}
+
 
 int main()
 {
