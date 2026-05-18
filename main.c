@@ -172,6 +172,32 @@ void updateStudent(Student students[], int count) {
     }
 }
 
+void bestStudent(Student students[], int count) {
+    
+    if (count == 0) {
+        printf("\nNo student records found.\n");
+        return;
+    }
+
+    
+    Student *best = &students[0];
+
+    
+    for (int i = 1; i < count; i++) {
+        if (students[i].average > best->average) {
+            
+            best = &students[i];
+        }
+    }
+
+    
+    printf("\n===== BEST PERFORMING STUDENT =====\n");
+    printf("Name: %s\n", best->name);
+    printf("Admission Number: %d\n", best->admissionNo);
+    printf("Age: %d\n", best->age);
+    printf("Average: %.2f\n", best->average);
+    printf("Grade: %c\n", best->grade);
+}
 
 int main()
 {
@@ -187,7 +213,8 @@ int main()
         printf("2. Display Students\n");
         printf("3. Search Student\n");
         printf("4. Update Student\n");
-        printf("5. Exit\n");
+        printf("5. Best Performing Student\n");
+        printf("6. Exit\n");
 
         printf("Enter choice: ");
         scanf("%d", &choice);
@@ -197,10 +224,11 @@ int main()
             case 2: displayStudents(students, count); break;
             case 3: searchStudent(students, count); break;
             case 4: updateStudent(students, count); break;
-            case 5: printf("Goodbye!\n"); break;
+            case 5: bestStudent(students, count); break;
+            case 6: printf("Goodbye!\n"); break;
             default: printf("Invalid choice. Try again.\n");
         }
-    } while (choice != 5);
+    } while (choice != 6);
 
     return 0;
 }
