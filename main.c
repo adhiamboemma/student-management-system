@@ -125,6 +125,53 @@ void searchStudent(Student students[], int count) {
     }
 }
 
+void updateStudent(Student students[], int count) {
+    
+    if (count == 0) {
+        printf("\nNo student records found.\n");
+        return;
+    }
+
+    
+    int searchNo;
+    printf("\nEnter admission number to update: ");
+    scanf("%d", &searchNo);
+
+    
+    int found = 0;
+
+    
+    for (int i = 0; i < count; i++) {
+        if (students[i].admissionNo == searchNo) {
+            
+            printf("Enter new mark for subject 1: ");
+            scanf("%f", &students[i].marks[0]);
+
+            printf("Enter new mark for subject 2: ");
+            scanf("%f", &students[i].marks[1]);
+
+            printf("Enter new mark for subject 3: ");
+            scanf("%f", &students[i].marks[2]);
+
+            
+            students[i].average = calculateAverage(students[i].marks);
+            students[i].grade = calculateGrade(students[i].average);
+
+            printf("\nStudent updated successfully!\n");
+            printf("New Average: %.2f\n", students[i].average);
+            printf("New Grade: %c\n", students[i].grade);
+
+            found = 1;
+            break;
+        }
+    }
+
+    
+    if (found == 0) {
+        printf("\nStudent with admission number %d not found.\n", searchNo);
+    }
+}
+
 
 int main()
 {
