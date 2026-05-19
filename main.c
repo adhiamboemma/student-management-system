@@ -2,17 +2,17 @@
 #include <string.h>
 
 /* ─────────────────────────────────────────
-   STRUCT DEFINITION
+   STRUCT 
    A Student holds all information for one
    student record in the system.
 ───────────────────────────────────────── */
 typedef struct
 {
     char name[50];       
-    int admissionNo;   
+    int admissionNo;     
     int age;             
     float marks[3];      
-    float average;       
+    float average;      
     char grade;          
 } Student;
 
@@ -27,6 +27,8 @@ void searchStudent(Student students[], int count);
 void updateStudent(Student students[], int count);
 void deleteStudent(Student students[], int *count);
 void bestStudent(Student students[], int count);
+void saveToFile(Student students[], int count);
+void loadFromFile(Student students[], int *count);
 char calculateGrade(float avg);
 float calculateAverage(float marks[]);
 
@@ -58,6 +60,81 @@ float calculateAverage(float marks[]) {
 }
 
 /* ─────────────────────────────────────────
+   saveToFile()
+   Writes all student records to students.txt
+   Called after every add, update or delete
+   so data is never lost between sessions.
+───────────────────────────────────────── */
+void saveToFile(Student students[], int count) {
+    /* open file for writing — creates it if it doesn't exist */
+    FILE *fp = fopen("students.txt", "w");
+
+    /* always check if file opened successfully */
+    if (fp == NULL) {
+        printf("Error: Could not save to file.\n");
+        return;
+    }
+
+    /* write count first so we know how many students to read back */
+    fprintf(fp, "%d\n", count);
+
+    /* write each student field by field */
+    for (int i = 0; i < count; i++) {
+        fprintf(fp, "%s\n", students[i].name);
+        fprintf(fp, "%d\n", students[i].admissionNo);
+        fprintf(fp, "%d\n", students[i].age);
+        fprintf(fp, "%f\n", students[i].marks[0]);
+        fprintf(fp, "%f\n", students[i].marks[1]);
+        fprintf(fp, "%f\n", students[i].marks[2]);
+        fprintf(fp, "%f\n", students[i].average);
+        fprintf(fp, "%c\n", students[i].grade);
+    }
+
+    
+    fclose(fp);
+}
+
+/* ─────────────────────────────────────────
+   loadFromFile()
+   Reads student records from students.txt
+   Called once at the start of main().
+   If the file does not exist yet (first
+   time running), it does nothing.
+───────────────────────────────────────── */
+void loadFromFile(Student students[], int *count) {
+    /* open file for reading */
+    FILE *fp = fopen("students.txt", "r");
+
+    
+    if (fp == NULL) {
+        return;
+    }
+
+    
+    fscanf(fp, "%d\n", count);
+
+
+    for (int i = 0; i < *count; i++) {
+        /* fgets reads the full name including spaces */
+        fgets(students[i].name, 50, fp);
+        
+        students[i].name[strcspn(students[i].name, "\n")] = '\0';
+
+        fscanf(fp, "%d\n", &students[i].admissionNo);
+        fscanf(fp, "%d\n", &students[i].age);
+        fscanf(fp, "%f\n", &students[i].marks[0]);
+        fscanf(fp, "%f\n", &students[i].marks[1]);
+        fscanf(fp, "%f\n", &students[i].marks[2]);
+        fscanf(fp, "%f\n", &students[i].average);
+        
+        fscanf(fp, " %c\n", &students[i].grade);
+    }
+
+    fclose(fp);
+    printf("Records loaded: %d student(s) found.\n", *count);
+}
+
+/* ─────────────────────────────────────────
    addStudent()
    Asks the user to enter student details,
    stores them in the array, automatically
@@ -75,20 +152,21 @@ void addStudent(Student students[], int *count) {
     /* consume leftover newline from previous scanf */
     getchar();
 
+    
     printf("Enter name: ");
     fgets(students[*count].name, 50, stdin);
-
+    
     students[*count].name[strcspn(students[*count].name, "\n")] = '\0';
 
     
     printf("Enter admission number: ");
     scanf("%d", &students[*count].admissionNo);
 
-    
+
     printf("Enter age: ");
     scanf("%d", &students[*count].age);
 
-
+    
     printf("Enter mark for subject 1: ");
     scanf("%f", &students[*count].marks[0]);
 
@@ -98,10 +176,11 @@ void addStudent(Student students[], int *count) {
     printf("Enter mark for subject 3: ");
     scanf("%f", &students[*count].marks[2]);
 
+    
     students[*count].average = calculateAverage(students[*count].marks);
     students[*count].grade = calculateGrade(students[*count].average);
 
-    
+
     (*count)++;
 
     printf("Student added successfully!\n");
@@ -114,6 +193,7 @@ void addStudent(Student students[], int *count) {
 ───────────────────────────────────────── */
 void displayStudents(Student students[], int count) {
 
+
     if (count == 0) {
         printf("\nNo student records found.\n");
         return;
@@ -121,13 +201,15 @@ void displayStudents(Student students[], int count) {
 
     printf("\n===== ALL STUDENT RECORDS =====\n");
 
-    /* loop through every student from index 0 to count-1 */
     for (int i = 0; i < count; i++) {
-        printf("Name: %s\n", students[i].name);
+        printf("\nRecord %d:\n", i + 1);
+        printf("Name:             %s\n", students[i].name);
         printf("Admission Number: %d\n", students[i].admissionNo);
-        printf("Age: %d\n", students[i].age);
-        printf("Average: %.2f\n", students[i].average);
-        printf("Grade: %c\n", students[i].grade);
+        printf("Age:              %d\n", students[i].age);
+        printf("Marks:            %.1f | %.1f | %.1f\n",
+               students[i].marks[0], students[i].marks[1], students[i].marks[2]);
+        printf("Average:          %.2f\n", students[i].average);
+        printf("Grade:            %c\n", students[i].grade);
         printf("---------------------------\n");
     }
 }
@@ -140,7 +222,7 @@ void displayStudents(Student students[], int count) {
 ───────────────────────────────────────── */
 void searchStudent(Student students[], int count) {
 
-    
+
     if (count == 0) {
         printf("\nNo student records found.\n");
         return;
@@ -150,24 +232,28 @@ void searchStudent(Student students[], int count) {
     int searchNo;
     printf("\nEnter admission number to search: ");
     scanf("%d", &searchNo);
+
+    
     int found = 0;
 
-    /* loop through all students comparing admission numbers */
+
     for (int i = 0; i < count; i++) {
         if (students[i].admissionNo == searchNo) {
-            /* match found — print details */
+            
             printf("\n===== STUDENT FOUND =====\n");
-            printf("Name: %s\n", students[i].name);
+            printf("Name:             %s\n", students[i].name);
             printf("Admission Number: %d\n", students[i].admissionNo);
-            printf("Age: %d\n", students[i].age);
-            printf("Average: %.2f\n", students[i].average);
-            printf("Grade: %c\n", students[i].grade);
-            found = 1;  /* mark as found */
-            break;      /* stop searching, no need to continue */
+            printf("Age:              %d\n", students[i].age);
+            printf("Marks:            %.1f | %.1f | %.1f\n",
+                   students[i].marks[0], students[i].marks[1], students[i].marks[2]);
+            printf("Average:          %.2f\n", students[i].average);
+            printf("Grade:            %c\n", students[i].grade);
+            found = 1; 
+            break;      
         }
     }
 
-    /* after loop — if flag is still 0, nobody matched */
+    
     if (found == 0) {
         printf("\nStudent with admission number %d not found.\n", searchNo);
     }
@@ -187,19 +273,19 @@ void updateStudent(Student students[], int count) {
         return;
     }
 
-    /* ask which student to update */
+    
     int searchNo;
     printf("\nEnter admission number to update: ");
     scanf("%d", &searchNo);
 
-    /* flag starts at 0 (not found) */
+    
     int found = 0;
 
-    /* search for the student */
+    
     for (int i = 0; i < count; i++) {
         if (students[i].admissionNo == searchNo) {
 
-            /* found — ask for new marks */
+            
             printf("Enter new mark for subject 1: ");
             scanf("%f", &students[i].marks[0]);
 
@@ -209,20 +295,20 @@ void updateStudent(Student students[], int count) {
             printf("Enter new mark for subject 3: ");
             scanf("%f", &students[i].marks[2]);
 
-            /* recalculate average and grade automatically */
+            
             students[i].average = calculateAverage(students[i].marks);
             students[i].grade = calculateGrade(students[i].average);
 
             printf("\nStudent updated successfully!\n");
             printf("New Average: %.2f\n", students[i].average);
-            printf("New Grade: %c\n", students[i].grade);
+            printf("New Grade:   %c\n", students[i].grade);
 
             found = 1;
             break;
         }
     }
 
-    /* after loop — nobody matched */
+    
     if (found == 0) {
         printf("\nStudent with admission number %d not found.\n", searchNo);
     }
@@ -231,36 +317,36 @@ void updateStudent(Student students[], int count) {
 /* ─────────────────────────────────────────
    deleteStudent()
    Finds a student by admission number and
-   removes them from the array by shifting
-   all students after them one position
-   to the left, then decreasing count by 1.
+   removes them by shifting all students
+   after them one position to the left,
+   then decreasing count by 1.
 ───────────────────────────────────────── */
 void deleteStudent(Student students[], int *count) {
 
-    /* nothing to delete if no students exist */
+
     if (*count == 0) {
         printf("\nNo student records found.\n");
         return;
     }
 
-    /* ask which student to delete */
+    
     int searchNo;
     printf("\nEnter admission number to delete: ");
     scanf("%d", &searchNo);
 
-    /* flag starts at 0 (not found) */
+    
     int found = 0;
 
-    /* search for the student */
+    
     for (int i = 0; i < *count; i++) {
         if (students[i].admissionNo == searchNo) {
 
-            /* found — shift every student after this one left by 1 */
+            
             for (int j = i; j < *count - 1; j++) {
                 students[j] = students[j + 1];
             }
 
-            /* decrease count — one fewer student now */
+            
             (*count)--;
 
             printf("\nStudent deleted successfully.\n");
@@ -269,7 +355,7 @@ void deleteStudent(Student students[], int *count) {
         }
     }
 
-    /* after loop — nobody matched */
+
     if (found == 0) {
         printf("\nStudent with admission number %d not found.\n", searchNo);
     }
@@ -279,36 +365,33 @@ void deleteStudent(Student students[], int *count) {
    bestStudent()
    Uses a pointer to track the best student
    as it loops through the array.
-   The pointer starts at students[0] and
-   moves whenever a higher average is found.
-   ──────────── */
+───────────────────────────────────────── */
 void bestStudent(Student students[], int count) {
 
-    /* nothing to check if no students exist */
     if (count == 0) {
         printf("\nNo student records found.\n");
         return;
     }
 
-    /* pointer starts pointing at the first student */
+    
     Student *best = &students[0];
 
-    /* loop from second student onwards */
+    
     for (int i = 1; i < count; i++) {
-        /* compare current student's average to whoever best points at */
+        
         if (students[i].average > best->average) {
-            /* this student is better — move pointer to them */
+            
             best = &students[i];
         }
     }
 
-    /* best now points at the top student — print using arrow operator */
+
     printf("\n===== BEST PERFORMING STUDENT =====\n");
-    printf("Name: %s\n", best->name);
+    printf("Name:             %s\n", best->name);
     printf("Admission Number: %d\n", best->admissionNo);
-    printf("Age: %d\n", best->age);
-    printf("Average: %.2f\n", best->average);
-    printf("Grade: %c\n", best->grade);
+    printf("Age:              %d\n", best->age);
+    printf("Average:          %.2f\n", best->average);
+    printf("Grade:            %c\n", best->grade);
 }
 
 /* ─────────────────────────────────────────
@@ -319,11 +402,14 @@ int main()
 {
     Student students[100];  
     int count = 0;          
-    int choice;             
+    int choice;            
+
+
+    loadFromFile(students, &count);
 
     do
     {
-        
+
         printf("\n===== STUDENT MANAGEMENT SYSTEM =====\n");
         printf("1. Add Student\n");
         printf("2. Display Students\n");
@@ -336,18 +422,36 @@ int main()
         printf("Enter choice: ");
         scanf("%d", &choice);
 
-        
+    
         switch(choice) {
-            case 1: addStudent(students, &count); break;
-            case 2: displayStudents(students, count); break;
-            case 3: searchStudent(students, count); break;
-            case 4: updateStudent(students, count); break;
-            case 5: deleteStudent(students, &count); break;
-            case 6: bestStudent(students, count); break;
-            case 7: printf("Goodbye!\n"); break;
-            default: printf("Invalid choice. Try again.\n");
+            case 1:
+                addStudent(students, &count);
+                saveToFile(students, count);   
+                break;
+            case 2:
+                displayStudents(students, count);
+                break;
+            case 3:
+                searchStudent(students, count);
+                break;
+            case 4:
+                updateStudent(students, count);
+                saveToFile(students, count);  
+                break;
+            case 5:
+                deleteStudent(students, &count);
+                saveToFile(students, count);   
+                break;
+            case 6:
+                bestStudent(students, count);
+                break;
+            case 7:
+                printf("Goodbye!\n");
+                break;
+            default:
+                printf("Invalid choice. Try again.\n");
         }
-    } while (choice != 7);
+    } while (choice != 7); 
 
     return 0;
 }
