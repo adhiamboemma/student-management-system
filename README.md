@@ -153,13 +153,13 @@ You may earn bonus points for implementing any of the following:
 ## Student Information
 
 **Full Name:**
-Write your full name here.
+Emmaculate Adhiambo Ochieng
 
 **Admission Number:**
-Write your admission number here.
+C026-01-0978/2025
 
 **Class:**
-Computer Science / Maths and Modelling
+Computer Science 
 
 ---
 
